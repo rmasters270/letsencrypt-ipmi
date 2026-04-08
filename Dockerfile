@@ -22,7 +22,7 @@ RUN apk add --no-cache ca-certificates bash openssl python3-dev py3-pip py3-open
     && mkdir -p /home/lego/.lego \
     && chown -R 1000:1000 /home/lego
 
-ADD entrypoint.sh le-supermicro-ipmi.sh supermicro-ipmi-updater.py /home/lego/
+ADD entrypoint.sh le-supermicro-ipmi.sh supermicro-ipmi-updater.py asrock_ipmi_cert_updater.py /home/lego/
 RUN chmod +x /home/lego/entrypoint.sh /home/lego/le-supermicro-ipmi.sh
 
 USER 1000
