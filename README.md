@@ -16,6 +16,8 @@ It has since **diverged significantly** and is no longer a drop-in replacement f
 
 ### Enhancements in this version
 
+* Added support for secrets in files
+* Added support for reoccurring schedule
 * Added support for **ASRock Rack IPMI** certificate updates
 * Unified certificate handling across multiple IPMI vendors
 * Integrated additional scripting and automation workflows
