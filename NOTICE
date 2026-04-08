@@ -1,12 +1,12 @@
 This project is based on and includes code from the following sources:
 
-1. docker-supermicro-letsencrypt  
-   https://github.com/starcraft66/docker-supermicro-letsencrypt  
+1. docker-supermicro-letsencrypt
+   https://github.com/starcraft66/docker-supermicro-letsencrypt
    Licensed under the MIT License.
    Copyright (c) Tristan
 
-2. supermicro-letsencrypt  
-   https://github.com/marthydavid/supermicro-letsencrypt  
+2. supermicro-letsencrypt
+   https://github.com/marthydavid/supermicro-letsencrypt
    Licensed under the MIT License.
    Copyright (c) marthydavid
 
@@ -16,8 +16,8 @@ This project is based on and includes code from the following sources:
    Licensed under the GNU General Public License v2 (GPLv2)
 
 4. letsencrypt-scripts
-   (asrock_ipmi_cert_updater.py)  
-   https://github.com/khung/letsencrypt-scripts  
+   (asrock_ipmi_cert_updater.py)
+   https://github.com/khung/letsencrypt-scripts
    Released into the public domain.
 
 Modifications:
