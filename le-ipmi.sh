@@ -25,7 +25,7 @@ set_env_var() {
 
 EXTRA_ARG=""
 if [ "${FORCE_UPDATE}" == "true" ]; then
-        EXTRA_ARG="--force-update"
+    EXTRA_ARG="--force-update"
 fi
 
 # Function to check SSL certificate expiry
@@ -49,7 +49,7 @@ if ! [ -z ${DEBUG+x} ]; then
 fi
 
 if [ -z ${FORCE_UPDATE+x} ]; then
-        FORCE_UPDATE="false"
+    FORCE_UPDATE="false"
 fi
 
 # Check certificate expiry or force_update flag
