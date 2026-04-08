@@ -1,28 +1,51 @@
-[![release](https://github.com/marthydavid/supermicro-letsencrypt/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/marthydavid/supermicro-letsencrypt/actions/workflows/release.yml)
+# Let's Encrypt IPMI
 
-# supermicro-letsencrypt
+[![release](https://github.com/rmasters270/etsencrypt-ipmi/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/rmasters270/letsencrypt-ipmi/actions/workflows/release.yml)
 
-Docker container to install Supermicro IPMI TLS certificates via ACME
+Docker container to install IPMI TLS certificates via ACME
 
+---
 
-[python script source](https://gist.github.com/mattisz/d112ebfe1869c56ce111ecbd2cbbd04d/569b20ddc8bcc2c04a875de2e9e918570a0cf93a)
+## Project Status
 
+This repository was originally forked from:
 
-# Config options
+* <https://github.com/marthydavid/supermicro-letsencrypt>
 
-| Option | Type | Default |
-|--------|------|---------|
-| IPMI_USERNAME | String | - |
-| IPMI_PASSWORD | String | - |
-| IPMI_DOMAIN  | String | - |
-| LE_EMAIL      | String | - |
-| LE_SERVER      | String | https://acme-v02.api.letsencrypt.org/directory |
-| DNS_PROVIDER  | String (options of [go-acme/lego](https://github.com/go-acme/lego#dns-providers) ) | route53 |
-| MODEL         | String (X9-X13) | X11 |
-| FORCE_UPDATE  | bool | false |
-| DEBUG         | any | - |
+It has since **diverged significantly** and is no longer a drop-in replacement for the original project.
 
-# Usage with Docker
+### Enhancements in this version
+
+* Added support for **ASRock Rack IPMI** certificate updates
+* Unified certificate handling across multiple IPMI vendors
+* Integrated additional scripting and automation workflows
+* Improved compatibility with different certificate formats (full chain vs device-specific requirements)
+
+ASRock support is based on:
+
+* <https://github.com/khung/letsencrypt-scripts/blob/master/asrock_ipmi_cert_updater.py>
+
+---
+
+## Config options
+
+| Option        | Type                                                                               | Default                                          |
+|---------------|------------------------------------------------------------------------------------|--------------------------------------------------|
+| IPMI_USERNAME | String                                                                             | -                                                |
+| IPMI_PASSWORD | String                                                                             | -                                                |
+| IPMI_DOMAIN   | String                                                                             | -                                                |
+| LE_EMAIL      | String                                                                             | -                                                |
+| LE_SERVER     | String                                                                             | <https://acme-v02.api.letsencrypt.org/directory> |
+| DNS_PROVIDER  | String (options of [go-acme/lego](https://github.com/go-acme/lego#dns-providers) ) | route53                                          |
+| MODEL         | String (X9-X13)                                                                    | X11                                              |
+| FORCE_UPDATE  | bool                                                                               | false                                            |
+| DEBUG         | any                                                                                | -                                                |
+
+Append _FILE to any variable to read its value from a file instead of directly from the environment.
+
+---
+
+## Usage with Docker
 
 ```bash
 docker run -v ~/.aws:/home/lego/.aws \
@@ -36,8 +59,9 @@ docker run -v ~/.aws:/home/lego/.aws \
            ghcr.io/marthydavid/supermicro-letsencrypt
 ```
 
+---
 
-# Usage with kubernetes cronjob
+## Usage with Kubernetes CronJob
 
 ```bash
 kubectl create configmap sm-ipmi-info \
@@ -46,6 +70,7 @@ kubectl create configmap sm-ipmi-info \
         --from-literal=LE_EMAIL=me@my.tld \
         --from-literal=DNS_PROVIDER=route53 \
         --from-literal=MODEL=X10
+
 kubectl create secret generic sm-ipmi-secret \
         --from-literal=IPMI_PASSWORD=ADMIN \
         --from-literal=AWS_ACCESS_KEY_ID=blahblahblah \
@@ -54,9 +79,47 @@ kubectl create secret generic sm-ipmi-secret \
 kubectl apply -f demo/kubernetes/cronjob.yaml
 kubectl get cm,secret,cronjob
 
-# To trigger a run:
-
+# To trigger a run:
 kubectl create job --from cronjob/sm-letsencrypt sm-letsencrypt-first-run
 
 kubectl logs -f sm-letsencrypt-first-run
 ```
+
+---
+
+## Licensing
+
+This project is distributed under the terms of the GNU General Public License v2.
+
+### Why GPLv2?
+
+This repository includes code derived from the Supermicro IPMI certificate updater originally written by Jari Turkia and distributed under GPLv2. Because of this, the combined work must also be distributed under GPLv2.
+
+### Third-Party Components
+
+* Original project:
+  <https://github.com/marthydavid/supermicro-letsencrypt> (MIT License)
+
+* Supermicro IPMI updater:
+  Copyright (c) Jari Turkia
+  Licensed under GPLv2
+
+* ASRock IPMI updater script:
+  <https://github.com/khung/letsencrypt-scripts>
+  Released into the public domain (or equivalent permissive terms)
+
+See the `NOTICE` file for full attribution details.
+
+---
+
+## Notes
+
+* This project is **not fully compatible with upstream** due to architectural and licensing changes
+* It is intended for multi-vendor IPMI environments (Supermicro + ASRock Rack)
+* No affiliation with Supermicro or ASRock Rack
+
+---
+
+## Disclaimer
+
+Use at your own risk. Modifying IPMI firmware or certificates can lead to loss of remote access if performed incorrectly.

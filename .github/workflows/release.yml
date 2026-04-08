@@ -8,7 +8,7 @@ on:
       - "v*.*.*"
 env:
   REGISTRY: ghcr.io
-  REGISTRY_IMAGE: ghcr.io/rmasters270/supermicro-letsencrypt
+  REGISTRY_IMAGE: ghcr.io/rmasters270/letsencrypt-ipmi
 
 
 jobs:
