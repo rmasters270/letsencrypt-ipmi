@@ -60,7 +60,7 @@ docker run -v ~/.aws:/home/lego/.aws \
            -e DNS_PROVIDER=route53 \
            -e MANUFACTURER=Supermicro
            -e MODEL=X10 \
-           ghcr.io/marthydavid/supermicro-letsencrypt
+           ghcr.io/rmasters270/letsencrypt-ipmi
 ```
 
 ---
