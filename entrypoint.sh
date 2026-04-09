@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-MAIN_SCRIPT="/home/lego/le-supermicro-ipmi.sh"
+MAIN_SCRIPT="/home/lego/le-ipmi.sh"
 
 trap 'STOP=true' SIGTERM SIGINT
 
