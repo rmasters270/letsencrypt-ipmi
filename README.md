@@ -39,6 +39,7 @@ ASRock support is based on:
 | LE_EMAIL      | String                                                                             | -                                                |
 | LE_SERVER     | String                                                                             | <https://acme-v02.api.letsencrypt.org/directory> |
 | DNS_PROVIDER  | String (options of [go-acme/lego](https://github.com/go-acme/lego#dns-providers) ) | route53                                          |
+| MANUFACTURER  | String (Supermicro, ASRock)                                                        | -                                                |
 | MODEL         | String (X9-X13)                                                                    | X11                                              |
 | FORCE_UPDATE  | bool                                                                               | false                                            |
 | DEBUG         | any                                                                                | -                                                |
@@ -57,6 +58,7 @@ docker run -v ~/.aws:/home/lego/.aws \
            -e IPMI_ADDRESS=ipmi.my.tld \
            -e LE_EMAIL=me@my.tld \
            -e DNS_PROVIDER=route53 \
+           -e MANUFACTURER=Supermicro
            -e MODEL=X10 \
            ghcr.io/marthydavid/supermicro-letsencrypt
 ```
@@ -71,6 +73,7 @@ kubectl create configmap sm-ipmi-info \
         --from-literal=IPMI_DOMAIN=ipmi.my.tld \
         --from-literal=LE_EMAIL=me@my.tld \
         --from-literal=DNS_PROVIDER=route53 \
+        --from-literal=MANUFACTURER=Supermicro
         --from-literal=MODEL=X10
 
 kubectl create secret generic sm-ipmi-secret \
@@ -82,9 +85,9 @@ kubectl apply -f demo/kubernetes/cronjob.yaml
 kubectl get cm,secret,cronjob
 
 # To trigger a run:
-kubectl create job --from cronjob/sm-letsencrypt sm-letsencrypt-first-run
+kubectl create job --from cronjob/letsencrypt letsencrypt-first-run
 
-kubectl logs -f sm-letsencrypt-first-run
+kubectl logs -f letsencrypt-first-run
 ```
 
 ---
