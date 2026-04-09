@@ -51,6 +51,18 @@ supermicro_ipmi_updater() {
         --model "${MODEL:-X11}" ${EXTRA_ARG}
 }
 
+asrock_ipmi_updater() {
+    printf '%s ' \
+        python3 asrock_ipmi_cert_updater.py cli --rshost "https://${IPMI_DOMAIN}" \
+        --cert-file "${CERT_DIR}/${IPMI_DOMAIN}.pem" --key-file "${CERT_DIR}/${IPMI_DOMAIN}.key" \
+        --username "${IPMI_USERNAME}" --password "${PASSWORD_DISPLAY}"
+    echo
+
+    python3 asrock_ipmi_cert_updater.py cli --rshost "https://${IPMI_DOMAIN}" \
+        --cert-file "${CERT_DIR}/${IPMI_DOMAIN}.pem" --key-file "${CERT_DIR}/${IPMI_DOMAIN}.key" \
+        --username "${IPMI_USERNAME}" --password "${IPMI_PASSWORD}"
+}
+
 set_env_var "IPMI_USERNAME"
 set_env_var "IPMI_PASSWORD"
 set_env_var "IPMI_DOMAIN"
@@ -89,8 +101,11 @@ fi
 if [ "${MANUFACTURER^^}" == "SUPERMICRO" ]; then
     echo "MANUFACTURER is ${MANUFACTURER}. Using Supermicro IPMI updater."
     supermicro_ipmi_updater
+elif [ "${MANUFACTURER^^}" == "ASROCK" ]; then
+    echo "MANUFACTURER is ${MANUFACTURER}. Using ASRock IPMI updater."
+    asrock_ipmi_updater
 else
-    echo "Unknown manufacturer: ${MANUFACTURER}. Please set the MANUFACTURER environment variable to 'Supermicro'." >&2
+    echo "Unknown manufacturer: ${MANUFACTURER}. Please set the MANUFACTURER environment variable to either 'Supermicro' or 'ASRock'." >&2
     exit 1
 fi
 set -x
