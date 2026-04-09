@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
+CERT_DIR=".lego/certificates"
 HEALTH_FILE="/tmp/last-run"
 
 set_env_var() {
@@ -62,7 +63,7 @@ else
 fi
 
 # Sign the request and obtain a certificate
-if [ -f ".lego/certificates/${IPMI_DOMAIN}.crt" ]; then
+if [ -f "${CERT_DIR}/${IPMI_DOMAIN}.crt" ]; then
     /lego --key-type rsa2048 --server "${LE_SERVER-https://acme-v02.api.letsencrypt.org/directory}" \
           --email "${LE_EMAIL}" --dns "${DNS_PROVIDER:-route53}" --accept-tos --domains "${IPMI_DOMAIN}" renew
 else
@@ -73,13 +74,13 @@ fi
 { set +x; } 2>/dev/null
 printf '%s ' \
     python3 supermicro-ipmi-updater.py --ipmi-url "https://${IPMI_DOMAIN}" \
-    --cert-file ".lego/certificates/${IPMI_DOMAIN}.crt" --key-file ".lego/certificates/${IPMI_DOMAIN}.key" \
+    --cert-file "${CERT_DIR}/${IPMI_DOMAIN}.crt" --key-file "${CERT_DIR}/${IPMI_DOMAIN}.key" \
     --username "${IPMI_USERNAME}" --password "${PASSWORD_DISPLAY}" \
     --model "${MODEL:-X11}" ${EXTRA_ARG}
 echo
 
 python3 supermicro-ipmi-updater.py --ipmi-url "https://${IPMI_DOMAIN}" \
-    --cert-file ".lego/certificates/${IPMI_DOMAIN}.crt" --key-file ".lego/certificates/${IPMI_DOMAIN}.key" \
+    --cert-file "${CERT_DIR}/${IPMI_DOMAIN}.crt" --key-file "${CERT_DIR}/${IPMI_DOMAIN}.key" \
     --username "${IPMI_USERNAME}" --password "${IPMI_PASSWORD}" \
     --model "${MODEL:-X11}" ${EXTRA_ARG}
 set -x
