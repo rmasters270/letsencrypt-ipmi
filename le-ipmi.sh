@@ -37,6 +37,20 @@ check_ssl_expiry() {
     return $?
 }
 
+supermicro_ipmi_updater() {
+    printf '%s ' \
+        python3 supermicro-ipmi-updater.py --ipmi-url "https://${IPMI_DOMAIN}" \
+        --cert-file "${CERT_DIR}/${IPMI_DOMAIN}.crt" --key-file "${CERT_DIR}/${IPMI_DOMAIN}.key" \
+        --username "${IPMI_USERNAME}" --password "${PASSWORD_DISPLAY}" \
+        --model "${MODEL:-X11}" ${EXTRA_ARG}
+    echo
+
+    python3 supermicro-ipmi-updater.py --ipmi-url "https://${IPMI_DOMAIN}" \
+        --cert-file "${CERT_DIR}/${IPMI_DOMAIN}.crt" --key-file "${CERT_DIR}/${IPMI_DOMAIN}.key" \
+        --username "${IPMI_USERNAME}" --password "${IPMI_PASSWORD}" \
+        --model "${MODEL:-X11}" ${EXTRA_ARG}
+}
+
 set_env_var "IPMI_USERNAME"
 set_env_var "IPMI_PASSWORD"
 set_env_var "IPMI_DOMAIN"
@@ -72,17 +86,13 @@ else
 fi
 
 { set +x; } 2>/dev/null
-printf '%s ' \
-    python3 supermicro-ipmi-updater.py --ipmi-url "https://${IPMI_DOMAIN}" \
-    --cert-file "${CERT_DIR}/${IPMI_DOMAIN}.crt" --key-file "${CERT_DIR}/${IPMI_DOMAIN}.key" \
-    --username "${IPMI_USERNAME}" --password "${PASSWORD_DISPLAY}" \
-    --model "${MODEL:-X11}" ${EXTRA_ARG}
-echo
-
-python3 supermicro-ipmi-updater.py --ipmi-url "https://${IPMI_DOMAIN}" \
-    --cert-file "${CERT_DIR}/${IPMI_DOMAIN}.crt" --key-file "${CERT_DIR}/${IPMI_DOMAIN}.key" \
-    --username "${IPMI_USERNAME}" --password "${IPMI_PASSWORD}" \
-    --model "${MODEL:-X11}" ${EXTRA_ARG}
+if [ "${MANUFACTURER^^}" == "SUPERMICRO" ]; then
+    echo "MANUFACTURER is ${MANUFACTURER}. Using Supermicro IPMI updater."
+    supermicro_ipmi_updater
+else
+    echo "Unknown manufacturer: ${MANUFACTURER}. Please set the MANUFACTURER environment variable to 'Supermicro'." >&2
+    exit 1
+fi
 set -x
 
 date +%s > "$HEALTH_FILE"
