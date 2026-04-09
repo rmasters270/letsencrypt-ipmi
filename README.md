@@ -1,6 +1,6 @@
 # Let's Encrypt IPMI
 
-[![release](https://github.com/rmasters270/etsencrypt-ipmi/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/rmasters270/letsencrypt-ipmi/actions/workflows/release.yml)
+[![release](https://github.com/rmasters270/letsencrypt-ipmi/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/rmasters270/letsencrypt-ipmi/actions/workflows/release.yml)
 
 Docker container to install IPMI TLS certificates via ACME
 
