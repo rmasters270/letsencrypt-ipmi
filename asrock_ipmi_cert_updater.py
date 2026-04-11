@@ -170,8 +170,8 @@ def update_certificate(rhost, key_file, cert_file, username, password, verbosity
         print("Certificate file '%s' does not exist!" % cert_file)
         return False
     # There doesn't seem to be any certificate handling in the Python standard libraries, so we just check the extension
-    if not key_file.endswith(".pem"):
-        print("Private key file '%s' may not be a PEM file!" % key_file)
+    if not key_file.endswith(".key"):
+        print("Private key file '%s' may not be a KEY file!" % key_file)
         return False
     if not cert_file.endswith(".pem"):
         print("Certificate file '%s' may not be a PEM file!" % key_file)
