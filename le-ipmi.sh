@@ -53,12 +53,12 @@ supermicro_ipmi_updater() {
 
 asrock_ipmi_updater() {
     printf '%s ' \
-        python3 asrock_ipmi_cert_updater.py cli --rshost "https://${IPMI_DOMAIN}" \
+        python3 asrock_ipmi_cert_updater.py cli --rhost "https://${IPMI_DOMAIN}" \
         --cert-file "${CERT_DIR}/${IPMI_DOMAIN}.pem" --key-file "${CERT_DIR}/${IPMI_DOMAIN}.key" \
         --username "${IPMI_USERNAME}" --password "${PASSWORD_DISPLAY}"
     echo
 
-    python3 asrock_ipmi_cert_updater.py cli --rshost "https://${IPMI_DOMAIN}" \
+    python3 asrock_ipmi_cert_updater.py cli --rhost "https://${IPMI_DOMAIN}" \
         --cert-file "${CERT_DIR}/${IPMI_DOMAIN}.pem" --key-file "${CERT_DIR}/${IPMI_DOMAIN}.key" \
         --username "${IPMI_USERNAME}" --password "${IPMI_PASSWORD}"
 }
