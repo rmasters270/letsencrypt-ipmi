@@ -13,7 +13,7 @@ RUN apk add --no-cache curl \
 
 
 # Runtime: lego
-FROM goacme/lego:v4.33.0
+FROM goacme/lego:v4.35.2
 
 COPY --from=supercronic /supercronic /usr/local/bin/supercronic
 
