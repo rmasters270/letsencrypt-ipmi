@@ -1,7 +1,7 @@
 ARG SUPERCRONIC_VERSION=v0.2.44
 
 # Builder: download supercronic
-FROM alpine:3.23 AS supercronic
+FROM alpine:3.24 AS supercronic
 ARG TARGETARCH
 ARG SUPERCRONIC_VERSION
 
