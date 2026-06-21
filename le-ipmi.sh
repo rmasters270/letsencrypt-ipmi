@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
 CERT_DIR=".lego/certificates"
 HEALTH_FILE="/tmp/last-run"
@@ -24,11 +24,6 @@ set_env_var() {
   fi
 }
 
-EXTRA_ARG=""
-if [ "${FORCE_UPDATE}" == "true" ]; then
-    EXTRA_ARG="--force-update"
-fi
-
 # Function to check SSL certificate expiry
 check_ssl_expiry() {
     # Use timeout to prevent hanging in case of connection issues
@@ -42,13 +37,13 @@ supermicro_ipmi_updater() {
         python3 supermicro-ipmi-updater.py --ipmi-url "https://${IPMI_DOMAIN}" \
         --cert-file "${CERT_DIR}/${IPMI_DOMAIN}.crt" --key-file "${CERT_DIR}/${IPMI_DOMAIN}.key" \
         --username "${IPMI_USERNAME}" --password "${PASSWORD_DISPLAY}" \
-        --model "${MODEL:-X11}" ${EXTRA_ARG}
+        --model "${MODEL:-X11}" "${SUPERMICRO_EXTRA_ARGS[@]}"
     echo
 
     python3 supermicro-ipmi-updater.py --ipmi-url "https://${IPMI_DOMAIN}" \
         --cert-file "${CERT_DIR}/${IPMI_DOMAIN}.crt" --key-file "${CERT_DIR}/${IPMI_DOMAIN}.key" \
         --username "${IPMI_USERNAME}" --password "${IPMI_PASSWORD}" \
-        --model "${MODEL:-X11}" ${EXTRA_ARG}
+        --model "${MODEL:-X11}" "${SUPERMICRO_EXTRA_ARGS[@]}"
 }
 
 asrock_ipmi_updater() {
@@ -68,15 +63,23 @@ set_env_var "IPMI_PASSWORD"
 set_env_var "IPMI_DOMAIN"
 set_env_var "LE_EMAIL"
 
+FORCE_UPDATE="${FORCE_UPDATE:-false}"
+DEBUG="${DEBUG:-false}"
+
+LEGO_EXTRA_ARGS=()
+SUPERMICRO_EXTRA_ARGS=()
+
+if [ "${FORCE_UPDATE}" == "true" ]; then
+    SUPERMICRO_EXTRA_ARGS+=(--force-update)
+    LEGO_EXTRA_ARGS+=(--renew-force)
+fi
+
 PASSWORD_DISPLAY="******"
 [[ -z "${IPMI_PASSWORD}" ]] && PASSWORD_DISPLAY="<empty>"
 
-if ! [ -z ${DEBUG+x} ]; then
-	set -x
-fi
-
-if [ -z ${FORCE_UPDATE+x} ]; then
-    FORCE_UPDATE="false"
+# Turn on debugging for main script.
+if [ "${DEBUG}" = "true" ]; then
+    set -x
 fi
 
 # Check certificate expiry or force_update flag
@@ -89,15 +92,16 @@ else
 fi
 
 # Sign the request and obtain a certificate
-if [ -f "${CERT_DIR}/${IPMI_DOMAIN}.crt" ]; then
-    /lego --key-type rsa2048 --server "${LE_SERVER-https://acme-v02.api.letsencrypt.org/directory}" \
-          --email "${LE_EMAIL}" --dns "${DNS_PROVIDER:-route53}" --accept-tos --domains "${IPMI_DOMAIN}" --pem renew
-else
-    /lego --key-type rsa2048 --server "${LE_SERVER-https://acme-v02.api.letsencrypt.org/directory}" \
-          --email "${LE_EMAIL}" --dns "${DNS_PROVIDER:-route53}" --accept-tos --domains "${IPMI_DOMAIN}" --pem run
+/lego run --pem --key-type rsa2048 --server "${LE_SERVER:-https://acme-v02.api.letsencrypt.org/directory}" \
+    --accept-tos --email "${LE_EMAIL}" --dns.propagation.disable-rns --dns "${DNS_PROVIDER:-route53}" \
+    --domains "${IPMI_DOMAIN}" "${LEGO_EXTRA_ARGS[@]}"
+
+# Disable debugging for python scripts to obscure invocation with secrets
+# The python scripts will display their own output
+if [ "${DEBUG}" = "true" ]; then
+    set +x
 fi
 
-{ set +x; } 2>/dev/null
 if [ "${MANUFACTURER^^}" == "SUPERMICRO" ]; then
     echo "MANUFACTURER is ${MANUFACTURER}. Using Supermicro IPMI updater."
     supermicro_ipmi_updater
@@ -108,6 +112,10 @@ else
     echo "Unknown manufacturer: ${MANUFACTURER}. Please set the MANUFACTURER environment variable to either 'Supermicro' or 'ASRock'." >&2
     exit 1
 fi
-set -x
+
+# Restore degugging
+if [ "${DEBUG}" = "true" ]; then
+    set -x
+fi
 
 date +%s > "$HEALTH_FILE"
