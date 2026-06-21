@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
 CERT_DIR=".lego/certificates"
 HEALTH_FILE="/tmp/last-run"
@@ -24,13 +24,6 @@ set_env_var() {
   fi
 }
 
-LEGO_EXTRA_ARG=""
-EXTRA_ARG=""
-if [ "${FORCE_UPDATE}" == "true" ]; then
-    EXTRA_ARG="--force-update"
-    LEGO_EXTRA_ARG="--renew-force"
-fi
-
 # Function to check SSL certificate expiry
 check_ssl_expiry() {
     # Use timeout to prevent hanging in case of connection issues
@@ -44,13 +37,13 @@ supermicro_ipmi_updater() {
         python3 supermicro-ipmi-updater.py --ipmi-url "https://${IPMI_DOMAIN}" \
         --cert-file "${CERT_DIR}/${IPMI_DOMAIN}.crt" --key-file "${CERT_DIR}/${IPMI_DOMAIN}.key" \
         --username "${IPMI_USERNAME}" --password "${PASSWORD_DISPLAY}" \
-        --model "${MODEL:-X11}" ${EXTRA_ARG}
+        --model "${MODEL:-X11}" "${SUPERMICRO_EXTRA_ARGS[@]}"
     echo
 
     python3 supermicro-ipmi-updater.py --ipmi-url "https://${IPMI_DOMAIN}" \
         --cert-file "${CERT_DIR}/${IPMI_DOMAIN}.crt" --key-file "${CERT_DIR}/${IPMI_DOMAIN}.key" \
         --username "${IPMI_USERNAME}" --password "${IPMI_PASSWORD}" \
-        --model "${MODEL:-X11}" ${EXTRA_ARG}
+        --model "${MODEL:-X11}" "${SUPERMICRO_EXTRA_ARGS[@]}"
 }
 
 asrock_ipmi_updater() {
@@ -70,15 +63,21 @@ set_env_var "IPMI_PASSWORD"
 set_env_var "IPMI_DOMAIN"
 set_env_var "LE_EMAIL"
 
+FORCE_UPDATE="${FORCE_UPDATE:-false}"
+
+LEGO_EXTRA_ARGS=()
+SUPERMICRO_EXTRA_ARGS=()
+
+if [ "${FORCE_UPDATE}" == "true" ]; then
+    SUPERMICRO_EXTRA_ARGS+=(--force-update)
+    LEGO_EXTRA_ARGS+=(--renew-force)
+fi
+
 PASSWORD_DISPLAY="******"
 [[ -z "${IPMI_PASSWORD}" ]] && PASSWORD_DISPLAY="<empty>"
 
 if ! [ -z ${DEBUG+x} ]; then
 	set -x
-fi
-
-if [ -z ${FORCE_UPDATE+x} ]; then
-    FORCE_UPDATE="false"
 fi
 
 # Check certificate expiry or force_update flag
@@ -93,7 +92,7 @@ fi
 # Sign the request and obtain a certificate
 /lego run --pem --key-type rsa2048 --server "${LE_SERVER:-https://acme-v02.api.letsencrypt.org/directory}" \
     --accept-tos --email "${LE_EMAIL}" --dns.propagation.disable-rns --dns "${DNS_PROVIDER:-route53}" \
-    --domains "${IPMI_DOMAIN}" ${LEGO_EXTRA_ARG:-}
+    --domains "${IPMI_DOMAIN}" "${LEGO_EXTRA_ARGS[@]}"
 
 { set +x; } 2>/dev/null
 if [ "${MANUFACTURER^^}" == "SUPERMICRO" ]; then
