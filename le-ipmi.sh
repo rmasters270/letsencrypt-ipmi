@@ -24,9 +24,11 @@ set_env_var() {
   fi
 }
 
+LEGO_EXTRA_ARG=""
 EXTRA_ARG=""
 if [ "${FORCE_UPDATE}" == "true" ]; then
     EXTRA_ARG="--force-update"
+    LEGO_EXTRA_ARG="--renew-force"
 fi
 
 # Function to check SSL certificate expiry
@@ -89,13 +91,9 @@ else
 fi
 
 # Sign the request and obtain a certificate
-if [ -f "${CERT_DIR}/${IPMI_DOMAIN}.crt" ]; then
-    /lego --key-type rsa2048 --server "${LE_SERVER-https://acme-v02.api.letsencrypt.org/directory}" \
-          --email "${LE_EMAIL}" --dns "${DNS_PROVIDER:-route53}" --accept-tos --domains "${IPMI_DOMAIN}" --pem renew
-else
-    /lego --key-type rsa2048 --server "${LE_SERVER-https://acme-v02.api.letsencrypt.org/directory}" \
-          --email "${LE_EMAIL}" --dns "${DNS_PROVIDER:-route53}" --accept-tos --domains "${IPMI_DOMAIN}" --pem run
-fi
+/lego run --pem --key-type rsa2048 --server "${LE_SERVER:-https://acme-v02.api.letsencrypt.org/directory}" \
+    --accept-tos --email "${LE_EMAIL}" --dns.propagation.disable-rns --dns "${DNS_PROVIDER:-route53}" \
+    --domains "${IPMI_DOMAIN}" ${LEGO_EXTRA_ARG:-}
 
 { set +x; } 2>/dev/null
 if [ "${MANUFACTURER^^}" == "SUPERMICRO" ]; then
