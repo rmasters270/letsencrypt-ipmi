@@ -64,6 +64,7 @@ set_env_var "IPMI_DOMAIN"
 set_env_var "LE_EMAIL"
 
 FORCE_UPDATE="${FORCE_UPDATE:-false}"
+DEBUG="${DEBUG:-false}"
 
 LEGO_EXTRA_ARGS=()
 SUPERMICRO_EXTRA_ARGS=()
@@ -76,8 +77,9 @@ fi
 PASSWORD_DISPLAY="******"
 [[ -z "${IPMI_PASSWORD}" ]] && PASSWORD_DISPLAY="<empty>"
 
-if ! [ -z ${DEBUG+x} ]; then
-	set -x
+# Turn on debugging for main script.
+if [ "${DEBUG}" = "true" ]; then
+    set -x
 fi
 
 # Check certificate expiry or force_update flag
@@ -94,7 +96,12 @@ fi
     --accept-tos --email "${LE_EMAIL}" --dns.propagation.disable-rns --dns "${DNS_PROVIDER:-route53}" \
     --domains "${IPMI_DOMAIN}" "${LEGO_EXTRA_ARGS[@]}"
 
-{ set +x; } 2>/dev/null
+# Disable debugging for python scripts to obscure invocation with secrets
+# The python scripts will display their own output
+if [ "${DEBUG}" = "true" ]; then
+    set +x
+fi
+
 if [ "${MANUFACTURER^^}" == "SUPERMICRO" ]; then
     echo "MANUFACTURER is ${MANUFACTURER}. Using Supermicro IPMI updater."
     supermicro_ipmi_updater
@@ -105,6 +112,10 @@ else
     echo "Unknown manufacturer: ${MANUFACTURER}. Please set the MANUFACTURER environment variable to either 'Supermicro' or 'ASRock'." >&2
     exit 1
 fi
-set -x
+
+# Restore degugging
+if [ "${DEBUG}" = "true" ]; then
+    set -x
+fi
 
 date +%s > "$HEALTH_FILE"
