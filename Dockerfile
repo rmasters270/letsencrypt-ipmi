@@ -1,4 +1,4 @@
-ARG SUPERCRONIC_VERSION=v0.2.49
+ARG SUPERCRONIC_VERSION=v0.2.51
 
 # Builder: download supercronic
 FROM alpine:3.24 AS supercronic
